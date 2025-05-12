@@ -1,5 +1,6 @@
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 
 /**
  * Configuración de Swagger para la documentación de la API
@@ -61,14 +62,18 @@ const swaggerSetup = (app) => {
       ],
     },
     apis: [
-      './src/routes/*.js',
-      './src/models/*.js',
-      './src/docs/*.js'
+      path.resolve(__dirname, '../routes/*.js'),
+      path.resolve(__dirname, '../models/*.js'),
+      path.resolve(__dirname, '../controllers/*.js'), // Añadir controladores también
+      path.resolve(__dirname, '../docs/*.js'),
     ],
   };
 
   const swaggerDocs = swaggerJsDoc(swaggerOptions);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  // Log para depuración
+  console.log('Swagger configurado en: /api-docs');
+  console.log('Rutas escaneadas:', swaggerOptions.apis);
 };
 
 module.exports = swaggerSetup;

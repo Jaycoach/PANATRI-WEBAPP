@@ -45,7 +45,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError') {
     // Error de validación de Mongoose
     errorResponse.error.message = Object.values(err.errors)
-      .map(val => val.message)
+      .map((val) => val.message)
       .join(', ');
     res.status(400).json(errorResponse);
   } else if (err.name === 'CastError') {
