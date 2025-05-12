@@ -1,0 +1,47 @@
+
+dist
+coverage
+.eslintrc.json
+.vscode
+*.tsbuildinfo
+*.tgz
+*.zip
+.prettierrc
+
+# Dependencias
+node_modules/
+npm-debug.log
+
+# Ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+
+# Archivos de construcción
+dist/
+build/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Archivos de carga temporal
+uploads/
+tmp/
+
+# Otros
+.nyc_output/
+.pnpm-debug.log
