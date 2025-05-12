@@ -185,16 +185,16 @@ const createVideo = asyncHandler(async (req, res) => {
   // Este middleware utiliza multer para manejar la subida de archivos
   uploadToS3.single('video')(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ 
-        success: false, 
-        error: err.message 
+      return res.status(400).json({
+        success: false,
+        error: err.message,
       });
     }
 
     if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Por favor, suba un archivo de video' 
+      return res.status(400).json({
+        success: false,
+        error: 'Por favor, suba un archivo de video',
       });
     }
 
