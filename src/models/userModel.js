@@ -90,7 +90,7 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       match: [
-        /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
+        /^([\w-.]+@([\w-]+\.)+[\w-]{2,4})?$/,
         'Por favor ingrese un correo electrónico válido',
       ],
     },
@@ -179,10 +179,7 @@ UserSchema.methods.getResetPasswordToken = function () {
   const resetToken = crypto.randomBytes(20).toString('hex');
 
   // Hash el token y establecerlo en resetPasswordToken
-  this.resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+  this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
   // Establecer tiempo de expiración
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutos

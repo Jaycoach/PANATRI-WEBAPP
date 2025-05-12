@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const ErrorResponse = require('../utils/errorResponse');
 const { logger } = require('../utils/logger');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 /**
  * Servicio para manejar la autenticación de usuarios
@@ -16,7 +17,7 @@ class AuthService {
     try {
       // Verificar si el email ya existe
       const existingUser = await User.findOne({ email: userData.email });
-      
+
       if (existingUser) {
         throw new ErrorResponse('El correo electrónico ya está registrado', 400);
       }
@@ -72,7 +73,7 @@ class AuthService {
 
       // Verificar si la contraseña coincide
       const isMatch = await user.matchPassword(password);
-      
+
       if (!isMatch) {
         throw new ErrorResponse('Credenciales inválidas', 401);
       }
@@ -131,15 +132,15 @@ class AuthService {
       };
     } catch (error) {
       logger.error(`Error al refrescar token: ${error.message}`);
-      
+
       if (error.name === 'TokenExpiredError') {
         throw new ErrorResponse('Token de refresco expirado, inicie sesión nuevamente', 401);
       }
-      
+
       if (error.name === 'JsonWebTokenError') {
         throw new ErrorResponse('Token de refresco inválido', 401);
       }
-      
+
       throw error;
     }
   }
@@ -181,10 +182,7 @@ class AuthService {
   async resetPassword(resetToken, newPassword) {
     try {
       // Hashear el token para comparar con el almacenado
-      const resetPasswordToken = crypto
-        .createHash('sha256')
-        .update(resetToken)
-        .digest('hex');
+      const resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
       // Buscar usuario con el token y que no haya expirado
       const user = await User.findOne({

@@ -42,11 +42,11 @@ const protect = asyncHandler(async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error de autenticación: ${error.message}`);
-    
+
     if (error.name === 'TokenExpiredError') {
       return next(new ErrorResponse('Token expirado, inicie sesión nuevamente', 401));
     }
-    
+
     return next(new ErrorResponse('No autorizado, token inválido', 401));
   }
 });

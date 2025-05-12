@@ -14,7 +14,7 @@ const connectDB = async () => {
     logger.info(`MongoDB conectado: ${conn.connection.host}`);
   } catch (error) {
     logger.error(`Error al conectar a MongoDB: ${error.message}`);
-    process.exit(1);
+    throw new Error(`Error al conectar a MongoDB: ${error.message}`);
   }
 };
 
