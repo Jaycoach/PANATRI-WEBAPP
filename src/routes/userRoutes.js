@@ -6,8 +6,9 @@ const {
   getEnrolledCourses,
   enrollInCourse,
   updateCourseProgress,
+  changeUserRole,
 } = require('../controllers/userController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -22,9 +23,7 @@ const router = express.Router();
 router.use(protect);
 
 // Rutas de perfil de usuario
-router.route('/profile')
-  .get(getUserProfile)
-  .put(updateUserProfile);
+router.route('/profile').get(getUserProfile).put(updateUserProfile);
 
 // Ruta para cambiar contraseña
 router.put('/change-password', changePassword);
@@ -33,5 +32,7 @@ router.put('/change-password', changePassword);
 router.get('/enrolled-courses', getEnrolledCourses);
 router.post('/enroll/:courseId', enrollInCourse);
 router.post('/course-progress', updateCourseProgress);
+// Ruta para cambiar el rol de un usuario (solo admin)
+router.put('/change-role/:userId', protect, authorize('admin'), changeUserRole);
 
 module.exports = router;

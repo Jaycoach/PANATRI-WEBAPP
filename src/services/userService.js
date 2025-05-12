@@ -43,10 +43,10 @@ class UserService {
     try {
       // Campos permitidos para actualizar
       const allowedUpdates = ['name', 'profileImage'];
-      
+
       // Filtrar solo los campos permitidos
       const filteredData = Object.keys(updateData)
-        .filter(key => allowedUpdates.includes(key))
+        .filter((key) => allowedUpdates.includes(key))
         .reduce((obj, key) => {
           obj[key] = updateData[key];
           return obj;
@@ -56,14 +56,10 @@ class UserService {
         throw new ErrorResponse('No se proporcionaron campos válidos para actualizar', 400);
       }
 
-      const user = await User.findByIdAndUpdate(
-        userId,
-        filteredData,
-        {
-          new: true,
-          runValidators: true,
-        }
-      ).select('-password -resetPasswordToken -resetPasswordExpire');
+      const user = await User.findByIdAndUpdate(userId, filteredData, {
+        new: true,
+        runValidators: true,
+      }).select('-password -resetPasswordToken -resetPasswordExpire');
 
       if (!user) {
         throw new ErrorResponse('Usuario no encontrado', 404);
@@ -93,7 +89,7 @@ class UserService {
 
       // Verificar contraseña actual
       const isMatch = await user.matchPassword(currentPassword);
-      
+
       if (!isMatch) {
         throw new ErrorResponse('Contraseña actual incorrecta', 401);
       }
@@ -148,20 +144,20 @@ class UserService {
     try {
       // Verificar si el curso existe y está publicado
       const course = await Course.findOne({ _id: courseId, isPublished: true });
-      
+
       if (!course) {
         throw new ErrorResponse('Curso no encontrado o no disponible', 404);
       }
 
       // Verificar si el usuario ya está matriculado
       const user = await User.findById(userId);
-      
+
       if (!user) {
         throw new ErrorResponse('Usuario no encontrado', 404);
       }
 
       const isEnrolled = user.enrolledCourses.some(
-        enrollment => enrollment.course.toString() === courseId
+        (enrollment) => enrollment.course.toString() === courseId
       );
 
       if (isEnrolled) {
@@ -177,7 +173,7 @@ class UserService {
 
       // Incrementar contador de matrículas del curso
       course.enrollmentCount += 1;
-      
+
       // Guardar cambios
       await Promise.all([user.save(), course.save()]);
 
@@ -204,7 +200,7 @@ class UserService {
     try {
       // Validar video y curso
       const video = await Video.findOne({ _id: videoId, course: courseId });
-      
+
       if (!video) {
         throw new ErrorResponse('Video no encontrado para este curso', 404);
       }
@@ -215,7 +211,7 @@ class UserService {
 
       // Calcular progreso general del curso
       const user = await User.findById(userId);
-      
+
       if (!user) {
         throw new ErrorResponse('Usuario no encontrado', 404);
       }
@@ -223,16 +219,16 @@ class UserService {
       // Buscar todos los videos del curso
       const allVideos = await Video.find({ course: courseId });
       const totalVideos = allVideos.length;
-      
+
       if (totalVideos === 0) {
         throw new ErrorResponse('El curso no tiene videos disponibles', 404);
       }
 
       // Contar videos completados
       let completedVideos = 0;
-      allVideos.forEach(video => {
+      allVideos.forEach((video) => {
         const userView = video.viewHistory.find(
-          view => view.user.toString() === userId && view.completed
+          (view) => view.user.toString() === userId && view.completed
         );
         if (userView) {
           completedVideos += 1;
@@ -244,7 +240,7 @@ class UserService {
 
       // Actualizar progreso en el curso matriculado
       const enrollmentIndex = user.enrolledCourses.findIndex(
-        enrollment => enrollment.course.toString() === courseId
+        (enrollment) => enrollment.course.toString() === courseId
       );
 
       if (enrollmentIndex === -1) {
@@ -253,7 +249,7 @@ class UserService {
 
       user.enrolledCourses[enrollmentIndex].progress = overallProgress;
       user.enrolledCourses[enrollmentIndex].lastAccessed = Date.now();
-      
+
       await user.save();
 
       return {
@@ -265,6 +261,47 @@ class UserService {
       };
     } catch (error) {
       logger.error(`Error al actualizar progreso: ${error.message}`);
+      throw error;
+    }
+  }
+  /**
+   * Cambiar el rol de un usuario (solo admin puede hacerlo)
+   * @param {string} targetUserId - ID del usuario a modificar
+   * @param {string} newRole - Nuevo rol (admin, instructor, user)
+   * @param {string} adminId - ID del admin que hace el cambio
+   * @returns {Object} Usuario actualizado
+   */
+  async changeUserRole(targetUserId, newRole, adminId) {
+    try {
+      // Verificar que quien realiza la acción es un admin
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new ErrorResponse('No autorizado para realizar esta acción', 403);
+      }
+
+      // Validar que el rol es válido
+      const validRoles = ['user', 'admin', 'instructor'];
+      if (!validRoles.includes(newRole)) {
+        throw new ErrorResponse('Rol inválido', 400);
+      }
+
+      // Actualizar el rol del usuario
+      const user = await User.findByIdAndUpdate(
+        targetUserId,
+        { role: newRole },
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).select('-password -resetPasswordToken -resetPasswordExpire');
+
+      if (!user) {
+        throw new ErrorResponse('Usuario no encontrado', 404);
+      }
+
+      return user;
+    } catch (error) {
+      logger.error(`Error al cambiar rol de usuario: ${error.message}`);
       throw error;
     }
   }

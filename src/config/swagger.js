@@ -24,7 +24,7 @@ const swaggerSetup = (app) => {
       },
       servers: [
         {
-          url: `http://localhost:${process.env.PORT || 5000}${process.env.API_PREFIX || '/api'}`,
+          url: `http://localhost:${process.env.PORT || 5000}`,
           description: 'Servidor de desarrollo',
         },
       ],

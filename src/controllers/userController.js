@@ -329,6 +329,50 @@ const updateCourseProgress = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/users/change-role/{userId}:
+ *   put:
+ *     summary: Cambiar el rol de un usuario (solo admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin, instructor]
+ *                 example: admin
+ *     responses:
+ *       200:
+ *         description: Rol actualizado exitosamente
+ */
+const changeUserRole = asyncHandler(async (req, res) => {
+  const adminId = req.user._id;
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  const user = await userService.changeUserRole(userId, role, adminId);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
@@ -336,4 +380,5 @@ module.exports = {
   getEnrolledCourses,
   enrollInCourse,
   updateCourseProgress,
+  changeUserRole,
 };
